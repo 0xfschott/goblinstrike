@@ -1,0 +1,48 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Caches
+*.sqlite3
+*.pyc
+
+# Static files
+/staticfiles/
+
+# Log files
+/logs/
+
+# Environment variables
+.env
+
+# IDE files
+.idea/
+.vscode/
+
+# Dependency directories
+venv/
+env/
+
+# Compiled Python files
+*.pyc
+*.pyo
+
+# Local development settings
+local_settings.py
+
+# macOS specific files
+.DS_Store
+
+# Temporary files
+*.swp
+*.swo
+
+# Django test database
+db.sqlite3
+
+# PyCharm files
+*.idea/
+*.iml
+.idea
+
