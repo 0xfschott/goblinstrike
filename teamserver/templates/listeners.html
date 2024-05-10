@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Listeners</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body, html {
+            height: 100%;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #333;
+            color: #8dbf42; /* Goblin green */
+        }
+
+        .form-control, .btn {
+            background: #222;
+            border: 1px solid #555;
+            color: #8dbf42;
+        }
+
+        .btn:hover {
+            background: #555;
+            color: #fff;
+        }
+
+        table, th, td {
+            border: 1px solid #555;
+            background-color: #222;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        
+        input[type="text"], input[type="number"] {
+            margin-bottom: 10px; /* Space between inputs */
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Manage HTTP Listeners</h1>
+
+        <!-- Form for Adding/Updating a Listener -->
+        <form id="listenerForm" class="my-4">
+            <input type="hidden" name="id" id="id">
+            <input type="text" name="name" id="listenerName" placeholder="Enter listener name" required class="form-control">
+            <input type="number" name="port" id="listenerPort" placeholder="Enter port number" required class="form-control">
+            <button type="button" id="saveListenerButton" class="btn btn-success">Save Listener</button>
+        </form>
+
+        <h2>Existing Listeners</h2>
+        <table id="listenersTable" class="table table-dark table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Port</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function fetchListeners() {
+            $.get('/api/listeners/', function(data) {
+                var rows = '';
+                data.listeners.forEach(function(listener) {
+                    rows += '<tr><td>' + listener.id + '</td><td>' + listener.name + '</td><td>' + listener.port +
+                            '</td><td><button class="btn btn-danger" onclick="deleteListener(' + listener.id + ')">Delete</button></td></tr>';
+                });
+                $('#listenersTable tbody').html(rows);
+            });
+        }
+
+        function deleteListener(id) {
+            $.ajax({
+                url: '/api/listeners/' + id,
+                type: 'DELETE',
+                success: function(result) {
+                    fetchListeners(); // Refresh the list after delete
+                }
+            });
+        }
+
+        function createListener() {
+            event.preventDefault();
+            
+            var csrfToken = $('[name=csrfmiddlewaretoken]').val();
+            var listenerData = {
+                name: $('#listenerName').val(),
+                port: $('#listenerPort').val()
+            };
+
+            var url = '/api/listeners/';
+            var method = 'POST';
+            if ($('#id').val()) {
+                url += $('#id').val() + '/';
+                method = 'PUT';
+            }
+
+            $.ajax({
+                url: url,
+                type: method,
+                contentType: 'application/json',
+                data: JSON.stringify(listenerData),
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                },
+                success: function(response) {
+                    $('#listenerForm')[0].reset();
+                    alert('Listener saved successfully!');
+                    fetchListeners();
+                },
+                error: function(xhr, status, error) {
+                    alert('Failed to save listener: ' + error);
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            fetchListeners(); // Load listeners on page load
+            $('#saveListenerButton').on('click', createListener);
+        });
+    </script>
+</body>
+</html>
